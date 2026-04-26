@@ -6,6 +6,7 @@ import time
 import hmac
 import hashlib
 import httpx
+import aiohttp
 
 load_dotenv()
 
@@ -80,11 +81,34 @@ async def get_balance_futers():
         # return balance
 
 
+async def normalize_symbols_binance(balance_spot: list) -> list:
+    """ Normalizate symbols from LDUSDT to USDT """
+    pass
+
+
+async def get_current_currency_spot():
+    """ Function for getting current currency from spot Binance,
+        need to calculation price coins from balances """
+    symbol = "BTCUSDT"
+    async with aiohttp.ClientSession() as session:
+        url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
+
+        response = await session.get(url)
+        result = [await response.json()]
+
+        for price in result:
+            curren_price = price["price"]
+            return curren_price
+
+
 def calc_balance_binance():
     """ Function for calculating all money in Binance """
     pass
+
 
 balance_spot = asyncio.run(get_balance_binance_spot())
 print(balance_spot)
 balance_futures = asyncio.run(get_balance_futers())
 print(balance_futures)
+current_price = asyncio.run(get_current_currency_spot())
+print(current_price)
