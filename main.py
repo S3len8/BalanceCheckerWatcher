@@ -85,36 +85,38 @@ balance_spot = asyncio.run(get_balance_binance_spot())
 
 async def normalize_symbols_binance(balance_spot: list) -> str:
     """ Normalizate symbols from LDUSDT to USDT """
-    for symbols in balance_spot:
-        symbol = symbols["asset"]
-        normalized_symbols = symbol.replace("LD", "")
-        await asyncio.sleep(0.01)
-        yield normalized_symbols
+    # for symbols in balance_spot:
+    #     symbol = symbols["asset"]
+    #     normalized_symbols = symbol.replace("LD", "")
+    #     return normalized_symbols
 
     # Write list comperhensions
-    # symbols = [symbols["asset"] for symbols in balance_spot]
-    # normalized_symbols = [symbol.replace("LD", "") for symbol in symbols]
-    # return normalized_symbols
+    symbols = [symbols["asset"] for symbols in balance_spot]
+    normalized_symbols = [symbol.removeprefix("LD") for symbol in symbols]
+    return normalized_symbols
 
-# normalized_symbols = asyncio.run(normalize_symbols_binance(balance_spot))
-# print(normalized_symbols)
-print(balance_spot)
+normalized_symbols = asyncio.run(normalize_symbols_binance(balance_spot))
+print(normalized_symbols)
+# print(balance_spot)
 
 
-async def get_current_currency_spot() -> list:
+async def get_current_currency_spot(normalized_symbols: list) -> list:
     """ Function for getting current currency from spot Binance,
         need to calculation price coins from balances """
-    async for symbol in normalize_symbols_binance(balance_spot):
-        symbol = symbol + "USDT"
-        async with aiohttp.ClientSession() as session:
-            url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
+    results = []
+    for normalized_symbol in normalized_symbols:
+        if normalized_symbol != "USDT":
+            normalized_symbol = normalized_symbol + "USDT"
+            async with aiohttp.ClientSession() as session:
+                url = f"https://api.binance.com/api/v3/ticker/price?symbol={normalized_symbol}"
 
-            response = await session.get(url)
-            result = [await response.json()]
+                response = await session.get(url)
+                result = [await response.json()]
 
-            for price in result:
-                curren_price = price["price"]
-                return curren_price
+                for price in result:
+                    current_price = price["price"]
+                    results.append(current_price)
+    return results
 
 
 def calc_balance_binance():
@@ -124,5 +126,5 @@ def calc_balance_binance():
 
 balance_futures = asyncio.run(get_balance_futers())
 print(balance_futures)
-current_price = asyncio.run(get_current_currency_spot())
+current_price = asyncio.run(get_current_currency_spot(normalized_symbols))
 print(current_price)
