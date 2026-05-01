@@ -122,12 +122,21 @@ async def get_current_currency_spot_create_session(normalized_symbols: list) -> 
         return results
 
 
-def calc_balance_binance():
+async def calc_balance_binance():
     """ Function for calculating all money in Binance """
-    pass
+    free_currency = [symbol["free"] for symbol in balance_spot]
+    result = []
+    for price, symbol in zip(free_currency, current_price):
+        calc_balance = float(price) * float(symbol)
+        result.append(calc_balance)
+
+    all_money = sum(result)
+    return all_money
 
 
 balance_futures = asyncio.run(get_balance_futers())
 print(balance_futures)
 current_price = asyncio.run(get_current_currency_spot_create_session(normalized_symbols))
 print(current_price)
+calc_balance_binance = asyncio.run(calc_balance_binance())
+print(calc_balance_binance)
