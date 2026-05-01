@@ -97,26 +97,29 @@ async def normalize_symbols_binance(balance_spot: list) -> str:
 
 normalized_symbols = asyncio.run(normalize_symbols_binance(balance_spot))
 print(normalized_symbols)
-# print(balance_spot)
+print(balance_spot)
 
 
-async def get_current_currency_spot(normalized_symbols: list) -> list:
-    """ Function for getting current currency from spot Binance,
-        need to calculation price coins from balances """
-    results = []
-    for normalized_symbol in normalized_symbols:
-        if normalized_symbol != "USDT":
-            normalized_symbol = normalized_symbol + "USDT"
-            async with aiohttp.ClientSession() as session:
-                url = f"https://api.binance.com/api/v3/ticker/price?symbol={normalized_symbol}"
+async def get_price(session, symbol) -> float:
+    """ Function for getting prices from Binance """
+    if symbol == "USDT":
+        return "1.0"
+    url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}USDT"
+    async with session.get(url) as response:
+        data = await response.json()
+        return data.get("price")
 
-                response = await session.get(url)
-                result = [await response.json()]
 
-                for price in result:
-                    current_price = price["price"]
-                    results.append(current_price)
-    return results
+async def get_current_currency_spot_create_session(normalized_symbols: list) -> list:
+    """ Function for creating session for function get_price """
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+
+        for symbol in normalized_symbols:
+            tasks.append(get_price(session, symbol))
+
+        results = await asyncio.gather(*tasks)
+        return results
 
 
 def calc_balance_binance():
@@ -126,5 +129,5 @@ def calc_balance_binance():
 
 balance_futures = asyncio.run(get_balance_futers())
 print(balance_futures)
-current_price = asyncio.run(get_current_currency_spot(normalized_symbols))
+current_price = asyncio.run(get_current_currency_spot_create_session(normalized_symbols))
 print(current_price)
