@@ -62,8 +62,30 @@ async def get_available_balance():
     """ Function for getting available balances from Bybit """
     for balance in balance_spot.get("result").get("list"):
         available_balance = balance["totalAvailableBalance"]
-        return available_balance 
+        return available_balance
+
+
+async def get_total_equity():
+    """ Function for getting all money on Bybit """
+    for balance in balance_spot.get("result").get("list"):
+        totalEquity = balance["totalEquity"]
+        return totalEquity
+
+
+async def get_assets():
+    """ Function for getting all assets from Bybit BTC, ETH, XRP and etc. """
+    result = {}
+    for balance in balance_spot.get("result").get("list"):
+        for coins in balance["coin"]:
+            coin = coins["coin"]
+            usdValue = coins["usdValue"]
+            result.update({coin: usdValue})
+    return result
 
 
 available_balance = asyncio.run(get_available_balance())
-print(available_balance) 
+print(available_balance)
+total_equity = asyncio.run(get_total_equity())
+print(total_equity)
+assets = asyncio.run(get_assets())
+print(assets)
