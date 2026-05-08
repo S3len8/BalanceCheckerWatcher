@@ -93,3 +93,46 @@ async def calc_all_assets():
 
 calc_all_assets = asyncio.run(calc_all_assets())
 print(calc_all_assets)
+
+
+async def get_current_price():
+    """ Function for getting current price Bitget """
+    endpoint = "/api/v2/spot/market/tickers"
+    timestamp = str(int(time.time() * 1000))
+    prehash_str = f"{timestamp}GET{endpoint}"
+
+    # ВАЖНО: Bitget V2 требует Base64
+    mac = hmac.new(
+        API_SECRET.encode('utf-8'),
+        prehash_str.encode('utf-8'),
+        hashlib.sha256
+    )
+    signature = base64.b64encode(mac.digest()).decode('utf-8')
+
+    headers = {
+        "ACCESS-KEY": API_KEY,
+        "ACCESS-SIGN": signature,
+        "ACCESS-TIMESTAMP": timestamp,
+        "ACCESS-PASSPHRASE": PASSWORD,
+        "Content-Type": "application/json"
+    }
+
+    url = f"{SPOT_AND_FUTURES_BASE_URL}{endpoint}"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=headers) as response:
+            return await response.json()
+
+
+
+get_current_price = asyncio.run(get_current_price())
+print(get_current_price)
+
+
+async def calc_price_spot():
+    """ Function for calculation price spot assets Bitget """
+    result = {}
+    for data in get_balance_spot.get("data"):
+        ticker = data["coin"]
+        available = data["available"]
+        pass
