@@ -16,6 +16,7 @@ API_KEY = os.getenv("MEXC_API_KEY")
 API_SECRET = os.getenv("MEXC_API_SECRET")
 MEXC_ID = os.getenv("MEXC_ID")
 SPOT_AND_FUTURES_BASE_URL = "https://api.mexc.com"
+FUTURES = "https://contract.mexc.com"
 
 
 async def get_mexc_balance_direct(api_key: str, secret_key: str) -> dict:
@@ -70,7 +71,7 @@ async def get_mexc_balance_direct(api_key: str, secret_key: str) -> dict:
 
                         if total > 0:
                             balances[asset['asset']] = {
-                                'free': free,
+                                'free': f"{free:.7f}",
                                 'locked': locked,
                                 'total': total
                             }
@@ -93,7 +94,7 @@ async def get_current_price(session, symbol):
     """ Function for getting current price from exchange """
     if symbol == "USDT":
         return "1.0"
-    url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}USDT"
+    url = f"https://api.mexc.com/api/v3/ticker/price?symbol={symbol}USDT"
     async with session.get(url) as response:
         data = await response.json()
         if data.get("price") == None:
@@ -135,9 +136,75 @@ async def calc_balance_spot():
     balance = {}
     # symbols = [symbol for symbol in get_balance_direct().keys()]
     for price, assets, symbol in zip(create_session_mexc_price, free_assets_mexc, get_balance_direct.keys()):
-        balance.update({symbol: float(price) * float(assets)})
+        balance.update({symbol: f"{float(price) * float(assets):.7f}"})
     return balance
 
 
 calc_balance_spot = asyncio.run(calc_balance_spot())
 print(calc_balance_spot)
+
+
+async def get_balance_futures(api_key: str, secret_key: str):
+    """ Function for getting balance futures MEXC """
+    endpoint = "/api/v1/private/account/assets"
+    # 1. Геруємо timestamp (мілісекунди)
+    timestamp = str(int(time.time() * 1000))
+
+    # 2. Формуємо рядок для підпису за стандартом Contract API:
+    # Рядок підпису = API_KEY + TIMESTAMP + [QUERY_PARAMS/BODY]
+    # Оскільки у нас GET без параметрів, додаємо тільки ключ і час
+    sign_str = api_key + timestamp
+
+    # 3. Створюємо підпис HMAC SHA256
+    signature = hmac.new(
+        secret_key.encode('utf-8'),
+        sign_str.encode('utf-8'),
+        hashlib.sha256
+    ).hexdigest()
+
+    # 4. Заголовки для CONTRACT API (відрізняються від SPOT)
+    headers = {
+        'ApiKey': api_key,
+        'Request-Time': timestamp,
+        'Signature': signature,
+        'Content-Type': 'application/json'
+    }
+
+    url = f"{FUTURES}{endpoint}"
+
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(url, headers=headers) as response:
+                if response.status == 200:
+                    data = await response.json()
+
+                    # Структура відповіді ф'ючерсів відрізняється від споту
+                    # Дані зазвичай знаходяться в data['data']
+                    balances = {}
+                    assets = data.get('data', [])
+
+                    for asset in assets:
+                        # У ф'ючерсах поля: availableBalance та frozenBalance
+                        available = float(asset.get('availableBalance', 0))
+                        frozen = float(asset.get('frozenBalance', 0))
+                        total = available + frozen
+
+                        if total > 0:
+                            balances[asset["currency"]] = {
+                                'free': f"{available:.4f}",
+                                'locked': f"{frozen:.4f}",
+                                'total': f"{total:.4f}"
+                            }
+                    return balances
+                else:
+                    error_text = await response.text()
+                    print(f"Помилка API (Код {response.status}): {error_text}")
+                    return {}
+
+        except aiohttp.ClientError as e:
+            print(f"Помилка мережі: {e}")
+            return {}
+
+
+get_balance_futures = asyncio.run(get_balance_futures(API_KEY, API_SECRET))
+print(get_balance_futures) 
