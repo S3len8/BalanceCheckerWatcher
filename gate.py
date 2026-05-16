@@ -72,9 +72,12 @@ async def get_balance_futures():
         "X-Gate-Size-Decimal": "1",
     }
     url = f"{SPOT_AND_FUTURES_BASE_URL}{endpoint}"
-    response = requests.get(url, headers=headers)
-    return response.json()
+    response = requests.get(url, headers=headers).json()
+    available = response["available"]
+    total =  response.get("total")
+    result = {"available": available, "total": total}
+    return result
 
 
 get_balance_futures = asyncio.run(get_balance_futures())
-print(get_balance_futures)  
+print(get_balance_futures) 
