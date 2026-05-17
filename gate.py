@@ -81,3 +81,47 @@ async def get_balance_futures():
 
 get_balance_futures = asyncio.run(get_balance_futures())
 print(get_balance_futures) 
+
+
+async def get_price(session, symbol):  
+    """ Function for getting price Gate """ 
+    if symbol == "USDT":
+        return "1.0"
+    url = f"https://api.gateio.ws/api/v4/spot/tickers?currency_pair={symbol}_USDT"
+    async with session.get(url) as response:
+        data = await response.json()
+        for price in data:
+            return price.get("last")
+
+
+async def create_session_gate(symbols: list):
+    """ Function for creating session Gate """
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        for symbol_dict in symbols:
+            symbol = symbol_dict["currency"]
+            tasks.append(get_price(session, symbol))
+
+        result = await asyncio.gather(*tasks)
+        return result
+
+
+create_session_gate = asyncio.run(create_session_gate(get_balance_spot))
+print(create_session_gate)
+
+
+async def sumarazing_assets_and_their_price(prices: list, symbols: list):
+    """ Function for sumarazing assets and their price Gate """
+    symbols_list = []
+    for symbol in symbols:
+        symbols_list.append(symbol["currency"])
+
+    result = {}
+    for symbol, price in zip(symbols_list, prices):
+        result.update({symbol: price})
+
+    return result
+
+
+sumarazing_assets_and_their_price = asyncio.run(sumarazing_assets_and_their_price(prices=create_session_gate, symbols=get_balance_spot))
+print(sumarazing_assets_and_their_price) 
