@@ -14,7 +14,6 @@ load_dotenv()
 
 API_KEY = os.getenv("GATE_API_KEY")
 API_SECRET = os.getenv("GATE_API_SECRET") 
-MEXC_ID = os.getenv("MEXC_ID")
 SPOT_AND_FUTURES_BASE_URL = "https://api.gateio.ws"
 
 
