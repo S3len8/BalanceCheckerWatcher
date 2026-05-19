@@ -87,7 +87,7 @@ async def get_mexc_balance_direct(api_key: str, secret_key: str) -> dict:
 
 
 get_balance_direct = asyncio.run(get_mexc_balance_direct(API_KEY, API_SECRET))
-print(get_balance_direct)
+# print(get_balance_direct)
 
 
 async def get_current_price(session, symbol):
@@ -115,7 +115,7 @@ async def create_session_mexc_price(get_balance_direct: dict):
 
 
 create_session_mexc_price = asyncio.run(create_session_mexc_price(get_balance_direct))
-print(create_session_mexc_price)
+# print(create_session_mexc_price)
 
 
 async def free_assets_mexc():
@@ -128,7 +128,7 @@ async def free_assets_mexc():
 
 
 free_assets_mexc = asyncio.run(free_assets_mexc())
-print(free_assets_mexc)
+# print(free_assets_mexc)
 
 
 async def calc_balance_spot():
@@ -141,7 +141,7 @@ async def calc_balance_spot():
 
 
 calc_balance_spot = asyncio.run(calc_balance_spot())
-print(calc_balance_spot)
+# print(calc_balance_spot)
 
 
 async def get_balance_futures(api_key: str, secret_key: str):
@@ -207,4 +207,23 @@ async def get_balance_futures(api_key: str, secret_key: str):
 
 
 get_balance_futures = asyncio.run(get_balance_futures(API_KEY, API_SECRET))
-print(get_balance_futures) 
+# print(get_balance_futures) 
+
+
+async def calc_USDT():
+    """ Function for calculating USDT """
+    result = []
+    for value in calc_balance_spot.values():
+        result.append(float(value))
+
+    for value in get_balance_futures.values():
+        free = value["free"]
+        locked = value["locked"]
+        total = value["total"]
+        result.append(float(free) + float(locked) + float(total))
+
+    return sum(result)
+
+
+# calc_USDT = asyncio.run(calc_USDT())
+# print(calc_USDT) 

@@ -45,7 +45,7 @@ async def get_balance_spot():
 
 
 get_balance_spot = asyncio.run(get_balance_spot())
-print(get_balance_spot)
+# print(get_balance_spot)
 
 
 async def get_balance_futures():
@@ -79,7 +79,7 @@ async def get_balance_futures():
 
 
 get_balance_futures = asyncio.run(get_balance_futures())
-print(get_balance_futures) 
+# print(get_balance_futures)
 
 
 async def get_price(session, symbol):  
@@ -106,7 +106,7 @@ async def create_session_gate(symbols: list):
 
 
 create_session_gate = asyncio.run(create_session_gate(get_balance_spot))
-print(create_session_gate)
+# print(create_session_gate)
 
 
 async def sumarazing_assets_and_their_price(prices: list, symbols: list):
@@ -115,12 +115,25 @@ async def sumarazing_assets_and_their_price(prices: list, symbols: list):
     for symbol in symbols:
         symbols_list.append(symbol["currency"])
 
+    # how_much_available = [how_much["available"] for how_much in symbols]
+
     result = {}
-    for symbol, price in zip(symbols_list, prices):
-        result.update({symbol: price})
+    for symbol, price, how_much in zip(symbols_list, prices, symbols):
+        how_much_have = how_much["available"]
+        result.update({symbol: float(price) * float(how_much_have)})
 
     return result
 
 
 sumarazing_assets_and_their_price = asyncio.run(sumarazing_assets_and_their_price(prices=create_session_gate, symbols=get_balance_spot))
-print(sumarazing_assets_and_their_price) 
+# print(sumarazing_assets_and_their_price)
+
+
+async def get_all_assets_gate():
+    """ Function for getting all assets Gate """
+    result = [values for values in sumarazing_assets_and_their_price.values()]
+    return sum(result)
+
+
+# get_all_assets_gate = asyncio.run(get_all_assets_gate())
+# print(get_all_assets_gate) 

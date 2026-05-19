@@ -80,7 +80,7 @@ async def get_balance_spot():
 
 
 get_balance_spot = asyncio.run(get_balance_spot())
-print(get_balance_spot)
+# print(get_balance_spot)
 
 
 async def list_symbols_spot():
@@ -90,7 +90,7 @@ async def list_symbols_spot():
 
 
 list_symbols_spot = asyncio.run(list_symbols_spot())
-print(list_symbols_spot)
+# print(list_symbols_spot)
 
 
 async def free_assets():
@@ -98,7 +98,7 @@ async def free_assets():
     return free_assets
 
 free_assets = asyncio.run(free_assets())
-print(free_assets)
+# print(free_assets)
 
 
 async def calc_all_assets():
@@ -111,7 +111,7 @@ async def calc_all_assets():
     return result
 
 calc_all_assets = asyncio.run(calc_all_assets())
-print(calc_all_assets)
+# print(calc_all_assets)
 
 
 async def get_price(session, symbol) -> float:
@@ -138,7 +138,7 @@ async def create_session_bitget(symbols_list: list):
 
 
 create_session_bitget = asyncio.run(create_session_bitget(list_symbols_spot))
-print(create_session_bitget)
+# print(create_session_bitget)
 
 async def calc_price_spot():
     """ Function for calculation price spot assets Bitget """
@@ -150,7 +150,7 @@ async def calc_price_spot():
 
 
 calc_price_spot = asyncio.run(calc_price_spot())
-print(calc_price_spot)
+# print(calc_price_spot)
 
 
 async def compare_price_with_symbols_spot():
@@ -162,4 +162,16 @@ async def compare_price_with_symbols_spot():
 
 
 compare_price_with_symbols_spot = asyncio.run(compare_price_with_symbols_spot())
-print(compare_price_with_symbols_spot)
+# print(compare_price_with_symbols_spot)
+
+
+async def get_all_assets():
+    """ Function for getting all assets Bitget """
+    result = []
+    for values in compare_price_with_symbols_spot.values():
+        result.append(values)
+
+    return sum(result)
+
+# get_all_assets = asyncio.run(get_all_assets())
+# print(get_all_assets) 

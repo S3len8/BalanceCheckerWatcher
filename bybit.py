@@ -55,7 +55,7 @@ async def get_balance_spot():
 
 
 balance_spot = asyncio.run(get_balance_spot())
-print(balance_spot)
+# print(balance_spot)
 
 
 async def get_available_balance():
@@ -84,8 +84,8 @@ async def get_assets():
 
 
 available_balance = asyncio.run(get_available_balance())
-print(available_balance)
-total_equity = asyncio.run(get_total_equity())
-print(total_equity)
-assets = asyncio.run(get_assets())
-print(assets)
+# print(available_balance)
+# total_equity = asyncio.run(get_total_equity())
+# print(total_equity)
+# assets = asyncio.run(get_assets())
+# print(assets) 

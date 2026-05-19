@@ -54,7 +54,7 @@ async def get_balance_spot():
 
 
 get_balance_spot = asyncio.run(get_balance_spot())
-print(get_balance_spot)
+# print(get_balance_spot)
 
 
 async def get_balance_futures():
@@ -85,13 +85,13 @@ async def get_balance_futures():
     }
     url = f"{FUTURES_BASE_URL}{endpoint}"
     response = requests.get(url, headers=headers).json()
-    print(response)
+    # print(response)
     result = response["data"]["availableBalance"]
     return result
 
 
 get_balance_futures = asyncio.run(get_balance_futures())
-print(get_balance_futures) 
+# print(get_balance_futures) 
 
 
 async def get_price(session, symbol):  
@@ -110,7 +110,7 @@ async def create_session_kucoin(symbols: list):
     async with aiohttp.ClientSession() as session:
         tasks = []
         for symbol in symbols:
-            print(symbol)
+            # print(symbol)
             tasks.append(get_price(session, symbol))
 
         result = await asyncio.gather(*tasks)
@@ -118,7 +118,7 @@ async def create_session_kucoin(symbols: list):
 
 
 create_session_kucoin = asyncio.run(create_session_kucoin(get_balance_spot))
-print(create_session_kucoin)
+# print(create_session_kucoin)
 
 
 async def sumarazing_assets_and_their_price(prices: list, symbols: list):
@@ -131,4 +131,17 @@ async def sumarazing_assets_and_their_price(prices: list, symbols: list):
 
 
 sumarazing_assets_and_their_price = asyncio.run(sumarazing_assets_and_their_price(prices=create_session_kucoin, symbols=get_balance_spot))
-print(sumarazing_assets_and_their_price) 
+# print(sumarazing_assets_and_their_price)
+
+
+async def calc_all_usdt():
+    """ Function for calculating all USDT """
+    result = []
+    for price in sumarazing_assets_and_their_price.values():
+        result.append(price)
+
+    return sum(result)
+
+
+# calc_all_usdt = asyncio.run(calc_all_usdt())
+# print(calc_all_usdt) 

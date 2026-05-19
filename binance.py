@@ -96,8 +96,8 @@ async def normalize_symbols_binance(balance_spot: list) -> str:
     return normalized_symbols
 
 normalized_symbols = asyncio.run(normalize_symbols_binance(balance_spot))
-print(normalized_symbols)
-print(balance_spot)
+# print(normalized_symbols)
+# print(balance_spot)
 
 
 async def get_price(session, symbol) -> float:
@@ -135,8 +135,8 @@ async def calc_balance_binance():
 
 
 balance_futures = asyncio.run(get_balance_futers())
-print(balance_futures)
+# print(balance_futures)
 current_price = asyncio.run(get_current_currency_spot_create_session(normalized_symbols))
-print(current_price)
+# print(current_price)
 # calc_balance_binance = asyncio.run(calc_balance_binance())
 # print(calc_balance_binance)
